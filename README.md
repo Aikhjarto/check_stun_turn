@@ -79,6 +79,16 @@ data. `0` OK, `1` WARNING, `2` CRITICAL, `3` UNKNOWN. An unreachable server, a
 refused allocation and an invalid certificate are CRITICAL; rejected
 credentials and a wrong command line are UNKNOWN.
 
+## Bash completion
+
+`completions/check_stun_turn` completes the modes, the options of each mode and
+their values, also when the plugin is called by its full path. The packages
+install it; otherwise copy it to bash-completion's directory:
+
+```sh
+install -D -m 0644 completions/check_stun_turn /usr/share/bash-completion/completions/check_stun_turn
+```
+
 ## Tests
 
 ```sh
@@ -90,6 +100,7 @@ encoding against the test vectors of RFC 5769 and run the plugin against a
 mock STUN/TURN server over UDP, TCP and TLS: binding, challenge, allocation
 with long-term credentials and with a shared secret, stale nonce, refused
 allocation, open relay, wrong credentials, no answer and command line errors.
+`tests/test_completion.py` checks the bash completion against `--help`.
 The TLS tests create a throwaway certificate with `openssl` and are skipped
 without it.
 

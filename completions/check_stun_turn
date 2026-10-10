@@ -1,0 +1,64 @@
+# bash completion for check_stun_turn                        -*- shell-script -*-
+
+_check_stun_turn()
+{
+    local cur=${COMP_WORDS[COMP_CWORD]} prev=${COMP_WORDS[COMP_CWORD-1]}
+    # --option=value: bash splits at the =
+    if [[ $cur == = ]]; then
+        cur=
+    elif [[ $prev == = && $COMP_CWORD -ge 2 ]]; then
+        prev=${COMP_WORDS[COMP_CWORD-2]}
+    fi
+    COMPREPLY=()
+
+    case $prev in
+        -H | --hostname | --sni)
+            mapfile -t COMPREPLY < <(compgen -A hostname -- "$cur")
+            return
+            ;;
+        -f | --password-file | -S | --secret-file)
+            compopt -o filenames 2>/dev/null
+            mapfile -t COMPREPLY < <(compgen -f -- "$cur")
+            return
+            ;;
+        -T | --transport)
+            mapfile -t COMPREPLY < <(compgen -W 'udp tcp tls' -- "$cur")
+            return
+            ;;
+        -p | --port | -t | --timeout | -w | --warning | -c | --critical | \
+            --cert-warning | --cert-critical | -u | --username | -P | --password | \
+            -s | --secret)
+            return
+            ;;
+    esac
+
+    # the mode is the first word that is not an option; the options before
+    # it take no value
+    local i mode=
+    for ((i = 1; i < COMP_CWORD; i++)); do
+        if [[ ${COMP_WORDS[i]} != -* ]]; then
+            mode=${COMP_WORDS[i]}
+            break
+        fi
+    done
+
+    local options='-h --help -H --hostname -p --port -T --transport -4 -6
+        -t --timeout -w --warning -c --critical -k --insecure --sni
+        --cert-warning --cert-critical'
+    case $mode in
+        '')
+            options='-h --help -V --version stun turn'
+            ;;
+        stun)
+            ;;
+        turn)
+            options+=' -u --username -P --password -f --password-file -s --secret
+                -S --secret-file'
+            ;;
+        *)
+            return
+            ;;
+    esac
+    mapfile -t COMPREPLY < <(compgen -W "$options" -- "$cur")
+}
+complete -F _check_stun_turn check_stun_turn
